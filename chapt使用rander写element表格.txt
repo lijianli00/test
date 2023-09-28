@@ -1,0 +1,171 @@
+import Vue from 'vue';
+import { Table, TableColumn, Pagination, Button } from 'element-ui';
+
+Vue.use(Table);
+Vue.use(TableColumn);
+Vue.use(Pagination);
+Vue.use(Button);
+
+export default {
+  name: 'MyTable',
+  props: {
+    tableData: {
+      type: Array,
+      required: true,
+    },
+    tableColumns: {
+      type: Array,
+      required: true,
+    },
+    currentPage: {
+      type: Number,
+      default: 1,
+    },
+    pageSize: {
+      type: Number,
+      default: 10,
+    },
+    total: {
+      type: Number,
+      required: true,
+    },
+  },
+  methods: {
+    handlePageChange(currentPage) {
+      this.$emit('page-change', currentPage);
+    },
+    handleEdit(row) {
+      this.$emit('edit', row);
+    },
+    handleDelete(row) {
+      this.$emit('delete', row);
+    },
+  },
+  render(h) {
+    return h(
+      'div',
+      {},
+      [
+        h(
+          'el-table',
+          {
+            props: {
+              data: this.tableData,
+              ...this.$attrs,
+            },
+          },
+          [
+            this.tableColumns.map(column =>
+              h('el-table-column', {
+                props: {
+                  prop: column.prop,
+                  label: column.label,
+                },
+              })
+            ),
+            h('el-table-column', {
+              props: {
+                label: 'Actions',
+              },
+              scopedSlots: {
+                default: scope => {
+                  return h(
+                    'div',
+                    {},
+                    [
+                      h('el-button', {
+                        props: {
+                          type: 'text',
+                          icon: 'el-icon-edit',
+                        },
+                        on: {
+                          click: () => this.handleEdit(scope.row),
+                        },
+                      }),
+                      h('el-button', {
+                        props: {
+                          type: 'text',
+                          icon: 'el-icon-delete',
+                        },
+                        on: {
+                          click: () => this.handleDelete(scope.row),
+                        },
+                      }),
+                    ]
+                  );
+                },
+              },
+            }),
+          ]
+        ),
+        h('el-pagination', {
+          props: {
+            current: this.currentPage,
+            pageSize: this.pageSize,
+            total: this.total,
+          },
+          on: {
+            'current-change': this.handlePageChange,
+          },
+        }),
+      ]
+    );
+  },
+};
+在这个示例中，我们创建了一个名为 MyTable 的组件，该组件接收五个 props：tableData、tableColumns、currentPage、pageSize 和 total。
+我们使用 render 函数来生成表格，h 是 createElement 方法的简写。
+
+在 render 函数中，我们使用 el-table 和 el-table-column 组件来呈现数据和列。
+我们还添加了一个 el-table-column 组件来呈现操作按钮，其中 scopedSlots 描述符被用来定义自定义插槽。
+
+我们将传递给组件的所有 $attrs 属性合并到表格的 props 中。我们还添加了分页组件，并将 currentPage、pageSize 和 total 作为 prop 传递给它。
+我们还添加了一个 handlePageChange 方法来处理分页更改事件，并将它作为事件侦听器绑定到分页组件。
+
+我们还为编辑和删除操作添加了两个方法 handleEdit() 和 handleDelete()，以便在单击编辑或删除按钮时触发相应的事件。
+我们使用 $emit() 方法将这些事件传递到父组件。
+
+您可以在您的应用程序中使用该组件，其中 tableData、tableColumns、currentPage、pageSize 和 total 是从父组件传递的 prop 值，
+而 handlePageChange、handleEdit 和 handleDelete 是由组件定义的方法。
+
+html
+<template>
+  <my-table :table-data="tableData" :table-columns="tableColumns" :current-page="currentPage" :page-size="pageSize" :total="total" @page-change="handlePageChange" @edit="handleEdit" @delete="handleDelete"></my-table>
+</template>
+
+<script>
+import MyTable from './MyTable.vue';
+
+export default {
+  components: {
+    MyTable,
+  },
+  data() {
+    return {
+      tableData: [
+        { name: 'John', age: 25, gender: 'Male' },
+        { name: 'Jane', age: 30, gender: 'Female' },
+        { name: 'Bob', age: 20, gender: 'Male' },
+           ],
+      tableColumns: [
+        { prop: 'name', label: 'Name' },
+        { prop: 'age', label: 'Age' },
+        { prop: 'gender', label: 'Gender' },
+      ],
+      currentPage: 1,
+      pageSize: 10,
+      total: 3,
+    };
+  },
+  methods: {
+    handlePageChange(currentPage) {
+      this.currentPage = currentPage;
+    },
+    handleEdit(row) {
+      // Handle edit
+    },
+    handleDelete(row) {
+      // Handle delete
+    },
+  },
+};
+</script>
